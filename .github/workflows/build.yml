@@ -33,29 +33,9 @@ jobs:
         with:
           gradle-version: 4.10.3
 
-      - name: Allow insecure protocols
-        run: |
-          mkdir -p ~/.gradle
-          cat > ~/.gradle/init.gradle << 'EOF'
-          allprojects {
-              buildscript {
-                  repositories {
-                      all { repo ->
-                          repo.allowInsecureProtocol = true
-                      }
-                  }
-              }
-              repositories {
-                  all { repo ->
-                      repo.allowInsecureProtocol = true
-                  }
-              }
-          }
-          EOF
-
       - name: Build with Gradle
         working-directory: project
-        run: gradle build --init-script ~/.gradle/init.gradle --stacktrace
+        run: gradle build --stacktrace
 
       - name: Find built jar
         id: find_jar

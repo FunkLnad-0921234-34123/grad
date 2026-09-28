@@ -29,13 +29,35 @@ jobs:
         with:
           gradle-version: 8.9
 
+      - name: Allow insecure protocols
+        run: |
+          mkdir -p ~/.gradle
+          cat > ~/.gradle/init.gradle << 'EOF'
+          allprojects {
+              buildscript {
+                  repositories {
+                      all { repo ->
+                          repo.allowInsecureProtocol = true
+                      }
+                  }
+              }
+              repositories {
+                  all { repo ->
+                      repo.allowInsecureProtocol = true
+                  }
+              }
+          }
+          EOF
+
       - name: Build with Gradle
         working-directory: project
-        run: gradle build
+        run: gradle build --init-script ~/.gradle/init.gradle --stacktrace
 
       - name: Upload Mod Artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: mod-jar
-          path: project/build/libs/*.jar
+          path: 'project/build/libs/*.jar'
+          if-no-files-found: warn
           retention-days: 30

@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,11 +56,18 @@ jobs:
         working-directory: project
         run: gradle build --init-script ~/.gradle/init.gradle --stacktrace
 
-      - name: Upload Mod Artifact
-        uses: actions/upload-artifact@v4
-        if: always()
+      - name: Find built jar
+        id: find_jar
+        run: |
+          JAR=$(find project/build/libs -name "*.jar" | head -n 1)
+          echo "jar_path=$JAR" >> $GITHUB_OUTPUT
+          echo "jar_name=$(basename $JAR)" >> $GITHUB_OUTPUT
+          ls -la project/build/libs/
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: mod-jar
-          path: 'project/build/libs/*.jar'
-          if-no-files-found: warn
-          retention-days: 30
+          tag_name: build-${{ github.run_number }}
+          name: "Build #${{ github.run_number }}"
+          files: ${{ steps.find_jar.outputs.jar_path }}
+          token: ${{ secrets.GITHUB_TOKEN }}

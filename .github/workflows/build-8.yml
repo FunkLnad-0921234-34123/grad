@@ -1,4 +1,4 @@
-name: Build Mod
+name: mod builder
 
 on:
   push:
@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "=== All files in build/libs ==="
           ls -la project/build/libs/
-          echo "=== Filtering out -sources.jar and -dev.jar ==="
+          echo "=== Filtering out -sources.jar ==="
           JAR=$(find project/build/libs -name "*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" ! -name "*-javadoc.jar" | head -n 1)
           echo "Selected JAR: $JAR"
           echo "jar_path=$JAR" >> $GITHUB_OUTPUT
@@ -55,7 +55,6 @@ jobs:
       - name: Verify selected jar
         run: |
           echo "Final selected jar: ${{ steps.find_jar.outputs.jar_name }}"
-          echo "Path: ${{ steps.find_jar.outputs.jar_path }}"
           unzip -l "${{ steps.find_jar.outputs.jar_path }}" | head -n 20
 
       - name: Upload to Release
